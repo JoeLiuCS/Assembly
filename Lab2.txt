@@ -1,0 +1,131 @@
+.data
+array:     .space  80
+arrayDiv:   .space 80
+Prompt1:    .asciiz  " \nPlease give me a integer : "
+Prompt2:    .asciiz  " \nThank you, bye !"
+Prompt3:    .asciiz  " \nThe largest number is : "
+Prompt4:    .asciiz  " \nThe smallest number is : "
+Prompt5:    .asciiz  " \nDivisible Numbers : "
+Prompt6:    .asciiz  " Show me remainder : "
+Space:      .asciiz  " "
+           .globl   main
+           .text
+main:      
+           la $t0 , array      # Store the numbers
+           li $t1 , 0          # Initialize Largest number
+           li $t2 , 0          # Initialize Smallest number
+           li $t3 , 0          # count how many Div 4 numbers
+           la $t4 , arrayDiv   # Store  Div 4 numbers
+           li $t5 , 20         # Totol numbers
+           li $t6 , 4          # Use for Divisible function
+           li $t7 , 0          # compare to zero
+loop1:     
+           blez $t5,conti      # Check the branch If 20 numbers entered
+           li $v0, 4 
+           la $a0, Prompt1     # Print Please give me a integer
+           syscall
+           
+           li $v0 ,5           # Enter a number
+           syscall
+
+           move $v1, $v0       
+           div  $v1, $t6       # Give remainder number
+           mfhi $t8
+           
+           li $v0,4
+           la $a0,Prompt6         #print show me remainder
+           syscall
+
+           li $v0,1
+           move $a0,$t8       # Print remainder number
+           syscall
+      
+	   jal storeDiv
+           sw   $v1, 0($t0)       # Store the number to temp array if this number is not able to div by 4
+           addi $t5, $t5, -1      # round count
+           addi  $t0,$t0,4        # move to next position
+           bgtz $t5 , loop1       # check round is bigger than zero
+conti:
+                                # Function for find the largest number and smallest number
+           li $t5 , 20          # Initialize the round cause we need to check every point
+           la $t0 , array       # reset array to first position
+
+           lw $v1, 0($t0)       # Load a Number
+           move $t1, $v1        # Put first number to Largest container
+           move $t2, $v1        # Also put first number to Smallest container
+           add  $t5, $t5, -1    # round count
+           add  $t0, $t0, 4     # Array move to next position
+find:      
+           blez $t5, tonext     # round check 
+           lw $v1, 0($t0)       # Load a number
+           
+           jal replaceL
+	   jal replaceS
+           add $t0, $t0, 4      # Move to next position
+           add $t5, $t5, -1     # rount count
+           b find               
+
+           #la
+tonext:
+           la $t4,arrayDiv      # Load Div Array
+           
+           li $v0, 4
+           la $a0,Prompt5       # Print Divisible numbers
+           syscall
+print:                        
+           li $v0, 1
+           lw $a0, 0($t4)       # Print a number from the Div Array
+           syscall
+
+           li $v0, 4
+           la $a0, Space        # Make a space
+           syscall
+           
+           addi $t3, $t3, -1     # round count
+           addi $t4, $t4, 4      # Move to next position
+           bgtz $t3, print       # round check
+                             
+
+           li $v0, 4        
+           la $a0, Prompt3       # Print The largest number
+           syscall
+
+           li $v0, 1
+           move $a0, $t1         # print the number
+           syscall
+
+           li $v0, 4
+           la $a0, Prompt4       # Print The smallest number
+           syscall
+ 
+           li $v0, 1
+           move $a0, $t2         # Print the number
+           syscall
+
+end:
+          li $v0, 4
+          la $a0, Prompt2        # Print thank you bye
+          syscall
+          li $v0, 10             # Exit
+          syscall
+
+replaceS:
+          bgt  $v1,$t2,Sdone # Check this number is smaller than the container, if yest, store it
+          move $t2, $v1         # Find the smaller number ,replace it to the container
+Sdone:
+          jr $ra
+replaceL:
+	  blt  $v1,$t1,Ldone # Check this number is bigger than the container, if yes, store it
+          move $t1, $v1        # Find the larger number ,replace it to the container
+Ldone:
+          jr $ra
+          
+storeDiv:
+           bnez  $t8, DivDone    # Check If reminder equal to zero,then store that number
+           sw $v1,0($t4)       # And also store it to Div Array for result
+           add  $t4,$t4,4
+           add  $t3, $t3 ,1    # Div Array total elements count
+DivDone:
+           jr $ra
+           
+           

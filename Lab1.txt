@@ -1,0 +1,144 @@
+.data
+array:        .space  80
+Prompt1:      .asciiz    " Please Enter the number : "
+Prompt2:      .asciiz    "\n Show One integer per line : "
+Prompt3:      .asciiz    "\n Show All integer in a single line separated by spaces : "
+Prompt4:      .asciiz    "\n Show All in integers in a single line in the reverse order by spaces "
+Prompt5:      .asciiz    "\n Get me a number for a line "
+Prompt6:      .asciiz    " Show N integer per line : \n"
+Space:        .asciiz    "   "
+Newline:      .asciiz    "\n"  
+Bye:          .asciiz    "\n Thank you good bye! "
+              .globl     main
+              .text
+main:
+                    li $t0 , 20          # $t0 for keep track the number of integers to be read
+                    la $t1, array        #loading the starting address of the array
+loop1:                                   #loop1 user enter the numbers
+                    li $v0, 4            
+                    la $a0, Prompt1      #print  Please Enter the number
+                    syscall
+ 	         
+                    li $v0, 5            #reading a integer
+                    syscall 
+                    
+                    sw $v0,0($t1)        #store the number
+                    add $t1, $t1, 4      #move to next index
+                    add $t0,$t0,-1       #loop round -1
+                    bgtz $t0, loop1      #if t0<20, go back to loop1
+
+                    li $v0, 4
+                    la $a0, Prompt2      # Print One integer per line
+                    syscall
+                    
+                    li $v0, 4
+                    la $a0,Newline
+                    syscall
+
+                    li $t0 , 20         #track the numbers
+                    la $t1, array       #loading the starting address of the array
+loop2:                                        
+                    li $v0, 1
+                    lw $a0, 0($t1)       #load a integer
+                    syscall
+                    
+                    li $v0, 4
+                    la $a0, Newline      #make a new line
+                    syscall
+
+                    add $t0,$t0, -1     #loop round -1
+                    add $t1,$t1, 4       #move to next index 
+                    bgtz $t0, loop2      #if t0<20, go back to loop2
+
+                    li $v0, 4
+                    la $a0, Prompt3      #print All integer in a single line separated by spaces
+                    syscall
+
+                    li $v0, 4
+                    la $a0,Newline
+                    syscall
+
+                    li $t0 , 20          # $t0 for keep track the number of integers to be read
+                    la $t1, array        #loading the starting address of the array
+loop3:                                          
+                    li $v0, 1
+                    lw $a0, 0($t1)       #load a integer
+                    syscall
+                    
+                    li $v0, 4
+                    la $a0, Space        #make a new space
+                    syscall
+
+                    add $t0,$t0, -1      #loop round -1
+                    add $t1,$t1, 4       #move to next index 
+                    bgtz $t0, loop3      #if t0<20, go back to loop3
+
+                    li $v0, 4
+                    la $a0, Prompt4     #print All in integers in a single line in the reverse order by spaces
+                    syscall
+
+                    li $v0, 4
+                    la $a0,Newline
+                    syscall
+
+                    li $t0 , 20         # $t0 for keep track the number of integers to be read
+                    la $t1, array       #loading the starting address of the array
+
+ loop4:                                          
+                    li $v0, 1
+                    lw $a0, 76($t1)     #load a integer from the last
+                    syscall
+                    
+                    li $v0, 4
+                    la $a0, Space       #make a new space
+                    syscall
+
+                    add $t0,$t0, -1     #loop round -1
+                    add $t1,$t1, -4     #move to next index 
+                    bgtz $t0, loop4     #if t0<20, go back to loop4
+
+                    li $v0, 4           #last part
+                    la $a0, Prompt5     #user input a number
+                    syscall
+
+                    li $v0, 5
+                    syscall
+                    
+                    move $v1, $v0      #save the number to $t3
+                    move $t2,$v1       #also save the number to $t2
+                    li $v0,4
+                    la $a0, Prompt6    #print Show N integer per line :
+                    syscall
+                    li $t0 , 20       # $t0 for keep track the number of integers to be read
+                    la $t1, array     #loading the starting address of the array
+                    
+loop5:                                          
+                    li $v0, 1
+                    lw $a0, 0($t1)     #load a integer 
+                    syscall
+                    
+                    li $v0, 4
+                    la $a0, Space      #make a new space
+                    syscall
+
+                    add $t0,$t0, -1    #loop round -1
+                    add $t1,$t1, 4     #move to next index 
+                    add $t2,$t2, -1    #count for row
+                    blez $t0, End
+                    blez $t2, makeline  #if $t2=0,make new line
+		    b loop5
+makeline:
+                    move $t2,$v1       #reset $t2
+                    li $v0, 4
+                    la $a0, Newline    #make new line
+                    syscall
+                    b loop5            #go back to loop5
+End:
+                    li $v0, 4
+                    la $a0, Bye       #print bye
+                    syscall
+                    li $v0,10          #End
+                    syscall
+
+
+                    
